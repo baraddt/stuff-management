@@ -1,0 +1,34 @@
+{
+  "stuff": [
+    {
+      "id": "ea17",
+      "name": "NInja",
+      "price": "5000",
+      "category": "Motor"
+    },
+    {
+      "id": "cc5a",
+      "name": "GTR",
+      "price": "4000",
+      "category": "Mobil"
+    }
+  ],
+  "category": [
+    {
+      "id": "0549",
+      "name": "Motor"
+    },
+    {
+      "id": "f879",
+      "name": "Mobil"
+    },
+    {
+      "id": "4879",
+      "name": "Food"
+    },
+    {
+      "id": "4062",
+      "name": "Batagor"
+    }
+  ]
+}
