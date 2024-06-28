@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dealer Motor Resmi</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white shadow">
+
+  <nav class="bg-gray-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-center">
+      <img class="w-36" src="img/logo-lp3i.svg" alt="Logo LP3I">
+    </div>
+  </nav>
+
+  <div class="container mx-auto mt-8">
+    <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Dealer Motor Resmi</h2>
+    <p class="text-center text-gray-500 mb-8">Berikut ini adalah beberapa motor yang tersedia:</p>
+    
+    <div id="motor-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- Products will be dynamically loaded here -->
+    </div>
+  </div>
+
+  <footer class="bg-black py-4 mt-8 shadow">
+    <div class="container mx-auto text-center text-white text-sm">
+      &copy; Edited By Mubarad Al-Ghyfari Mahasiswa | Politeknik LP3I Kampus Tasikmalaya
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const loadProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/products');
+        const products = response.data;
+        const motorList = document.getElementById('motor-list');
+        let output = '';
+
+        products.forEach(product => {
+          output += `
+            <div class="bg-gray-50 rounded-lg shadow p-4">
+              <img class="w-full h-48 object-contain mb-4" src="${product.image}" alt="${product.name}">
+              <h3 class="text-lg font-bold text-gray-700 mb-2">${product.name}</h3>
+              <p class="text-gray-500 mb-2">${product.description}</p>
+              <div class="mb-2 px-2 py-1 border ${product.kategori === 'MT' ? 'border-red-700 bg-red-700' : 'border-blue-200 bg-blue-200'} inline-block rounded-lg">
+                <span class="${product.kategori === 'MT' ? 'text-red-300' : 'text-blue-600'} font-bold">${product.kategori}</span>
+              </div>
+              <div>
+                <span class="text-gray-900 font-semibold">Rp${product.price}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        motorList.innerHTML = output;
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+
+    window.onload = loadProducts;
+  </script>
+</body>
+</html>

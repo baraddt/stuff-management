@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+  <div class="container mx-auto p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-bold mb-4">Product Management</h2>
+      <div class="mb-4">
+        <input type="text" placeholder="Product Name" id="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" />
+        <input type="text" placeholder="Price" id="price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" />
+        <input type="text" placeholder="Category description" id="description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" />
+        <select id="kategori" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"></select>
+        <input type="file" id="image" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2" />
+        <button type="button" id="save" onclick="SaveProduct()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
+        <div class="flex justify-end">
+          <a href="categories.html" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add Categories</a>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">ID</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Name</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Price</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Category</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Image</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Description</th>
+              <th class="py-2 px-3 border-b-2 border-gray-300 text-left leading-tight">Action</th>
+            </tr>
+          </thead>
+          <tbody id="result">
+            <!-- Data produk akan muncul di sini -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const GetProducts = async () => {
+      await axios
+        .get("http://localhost:3000/products")
+        .then((response) => {
+          console.log(response.data);
+          const products = response.data;
+          let bucket = "";
+          products.forEach((product, index) => {
+            bucket += `
+                <tr>
+                    <td class="py-2 px-3 border-b border-gray-300">${index + 1}</td>
+                    <td class="py-2 px-3 border-b border-gray-300">${product.name}</td>                   
+                    <td class="py-2 px-3 border-b border-gray-300">Rp.${product.price}</td>            
+                    <td class="py-2 px-3 border-b border-gray-300">${product.kategori}</td>            
+                    <td class="py-2 px-3 border-b border-gray-300"><img src="${product.image}" alt="${product.name}" class="w-12 h-12 object-cover"></td>         
+                    <td class="py-2 px-3 border-b border-gray-300">${product.description}</td>            
+                    <td class="py-2 px-3 border-b border-gray-300">
+                      <button onclick="Delete('${product.id}')" type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Delete</button>
+                      <button onclick="EditProducts('${product.id}')" type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">Update</button>
+                    </td>
+                </tr>`;
+          });
+          document.getElementById("result").innerHTML = bucket;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    };
+
+    const LoadCategories = async () => {
+      await axios
+        .get("http://localhost:3000/categories")
+        .then((response) => {
+          console.log(response.data);
+          const categories = response.data;
+          let options = "";
+          categories.forEach((category) => {
+            options += `<option value="${category.nama}">${category.nama}</option>`;
+          });
+          document.getElementById("kategori").innerHTML = options;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    };
+
+    LoadCategories();
+    GetProducts();
+
+    const encodeImageFileAsURL = (element) => {
+      return new Promise((resolve, reject) => {
+        const file = element.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = (error) => {
+          reject(error);
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    const SaveProduct = async () => {
+      let name = document.getElementById("name").value;
+      let price = document.getElementById("price").value;
+      let kategori = document.getElementById("kategori").value;
+      let imageElement = document.getElementById("image");
+      let description = document.getElementById("description").value;
+
+      try {
+        let image = await encodeImageFileAsURL(imageElement);
+        await axios
+          .post("http://localhost:3000/products", {
+            name: name,
+            price: price,
+            kategori: kategori,
+            image: image,
+            description: description,
+          })
+          .then((response) => {
+            console.log(response);
+            GetProducts(); // Refresh product list
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    const Delete = async (id) => {
+      if (confirm(`Are you sure you want to delete this item?`)) {
+        await axios
+          .delete(`http://localhost:3000/products/${id}`)
+          .then((response) => {
+            console.log(response);
+            GetProducts();
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      }
+    };
+
+    const EditProducts = async (id) => {
+      await axios
+        .get(`http://localhost:3000/products/${id}`)
+        .then((response) => {
+          const product = response.data;
+          document.getElementById("name").value = product.name;
+          document.getElementById("price").value = product.price;
+          document.getElementById("kategori").value = product.kategori;
+          document.getElementById("description").value = product.description;
+          document.getElementById("save").innerText = "Update";
+          document
+            .getElementById("save")
+            .setAttribute("onclick", `UpdateProducts('${id}')`);
+          console.log(response);
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    };
+
+    const UpdateProducts = async (id) => {
+      let name = document.getElementById("name").value;
+      let price = document.getElementById("price").value;
+      let kategori = document.getElementById("kategori").value;
+      let imageElement = document.getElementById("image");
+      let description = document.getElementById("description").value;
+
+      try {
+        let image = await encodeImageFileAsURL(imageElement);
+        await axios
+          .patch(`http://localhost:3000/products/${id}`, {
+            name: name,
+            price: price,
+            kategori: kategori,
+            image: image,
+            description: description,
+          })
+          .then((response) => {
+            console.log(response);
+            document.getElementById("name").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("description").value = "";
+            document.getElementById("save").innerText = "Save";
+            document
+              .getElementById("save")
+              .setAttribute("onclick", `SaveProduct()`);
+            GetProducts();
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+  </script>
+</body>
+</html>
